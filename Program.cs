@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -35,7 +36,7 @@ namespace CSVCleaner
                     var encode = DetectTextEncoding(path, out var csvText);
                     //Limpar
                     WriteConsole("2 - Limpando o texto do arquivo!");
-                    var cleanedText = Cleaner(csvText);
+                    var cleanedText = RemoveDiacritics(csvText);
                     //Criando arquivo limpo
                     WriteConsole("3 - Gerando arquivo de saida!\n");
                     var outPath = $"{PATH_OUT}/{Path.GetFileName(path)}";
@@ -51,6 +52,23 @@ namespace CSVCleaner
             }
         }
 
+        private static string RemoveDiacritics(string text)
+        {
+            var normalizedString = text.Normalize(NormalizationForm.FormD);
+            var stringBuilder = new StringBuilder();
+
+            foreach (var c in normalizedString)
+            {
+                var unicodeCategory = CharUnicodeInfo.GetUnicodeCategory(c);
+                if (unicodeCategory != UnicodeCategory.NonSpacingMark)
+                {
+                    stringBuilder.Append(c);
+                }
+            }
+
+            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+        }
+
         private static void WriteConsole(string text, bool isTitle = false)
         {
             if (isTitle)
@@ -62,34 +80,6 @@ namespace CSVCleaner
                 Console.WriteLine(text);
             }
 
-        }
-        public static string Cleaner(string input)
-        {
-            if (input == null || input.Equals(string.Empty)) return string.Empty;
-
-            var output = input.Trim()
-                    .Replace("&", "e")
-                    .Replace("á", "a")
-                    .Replace("é", "e")
-                    .Replace("í", "i")
-                    .Replace("ó", "o")
-                    .Replace("ú", "u")
-                    .Replace("ý", "y")
-                    .Replace("à", "a")
-                    .Replace("è", "e")
-                    .Replace("ì", "i")
-                    .Replace("ò", "o")
-                    .Replace("ù", "u")
-                    .Replace("â", "a")
-                    .Replace("ê", "e")
-                    .Replace("î", "i")
-                    .Replace("ô", "o")
-                    .Replace("û", "u")
-                    .Replace("ã", "a")
-                    .Replace("õ", "o")
-                    .Replace("ç", "c");
-
-            return output;
         }
 
         public static Encoding DetectTextEncoding(string filename, out String text, int taster = 1000)
