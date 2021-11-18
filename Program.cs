@@ -66,7 +66,24 @@ namespace CSVCleaner
                 }
             }
 
-            return stringBuilder.ToString().Normalize(NormalizationForm.FormC);
+            var outputText = stringBuilder
+                .ToString()
+                .Normalize(NormalizationForm.FormC)
+                .Trim()
+                .Replace("[", "")
+                .Replace("]", "")
+                .Replace("{", "")
+                .Replace("}", "")
+                .Replace(")", "")
+                .Replace("(", "")
+                .Replace("%", "")
+                .Replace(",", "")
+                .Replace("#", "")
+                .Replace("?", "")
+                .Replace("!", "");
+
+
+            return outputText;
         }
 
         private static void WriteConsole(string text, bool isTitle = false)
